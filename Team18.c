@@ -1,6 +1,6 @@
 // TEAM 18
 // Member 1: Anurav Garg, 2021A7PS2782H
-// Member 2: Dharanikanth Reddy,	2021A7PS0264H
+// Member 2: Dharanikanth Reddy, 2021A7PS0264H
 
 #include <stdio.h>
 #include <stdlib.h>
