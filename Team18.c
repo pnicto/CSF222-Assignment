@@ -73,7 +73,7 @@ int** readGraphFromFile(int* nodeCount, int* edgeCount, FILE* inputFile) {
       }
       free(adjacencyMatrix);
       fclose(inputFile);
-      // return 1;
+      exit(1);
     }
     adjacencyMatrix[node1 - 1][node2 - 1] = 1;
     adjacencyMatrix[node2 - 1][node1 - 1] = 1;
@@ -148,9 +148,11 @@ int main(int argc, char* argv[]) {
   int* degreeSequence2 = getDegreeSequence(nodeCount2, adjacencyMatrix2);
 
   int flag = 1;
-  for (int i = 0; (i < nodeCount1) && flag; i++) {
-    if (degreeSequence1[i] != degreeSequence2[i]) {
-      flag = 0;
+  if (nodeCount1 == nodeCount2) {
+    for (int i = 0; (i < nodeCount1) && flag; i++) {
+      if (degreeSequence1[i] != degreeSequence2[i]) {
+        flag = 0;
+      }
     }
   }
 
