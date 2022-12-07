@@ -52,62 +52,87 @@ int* getDegreeSequence(int nodeCount, int** adjacencyMatrix) {
   return degreeSequence;
 }
 
-int main(int argc, char* argv[]) {
-  // Checks if input filename was given as commandline argument
-  if (argc < 2) {
-    printf("The input filename must be given as an argument\n");
-    return 1;
-  }
+int** readGraphFromFile(int* nodeCount, int* edgeCount, FILE* inputFile) {
+  fscanf(inputFile, "%d", nodeCount);
+  fscanf(inputFile, "%d", edgeCount);
 
-  FILE* inputFile;
-  inputFile = fopen(argv[1], "r");
-
-  // Checks if the file opened successfully
-  if (!inputFile) {
-    printf("The file couldn't be opened, please check the file name\n");
-    return 1;
-  }
-
-  int nodeCount, edgeCount;
-  fscanf(inputFile, "%d", &nodeCount);
-  fscanf(inputFile, "%d", &edgeCount);
-
-  int** adjacencyMatrix = getAdjacencyMatrix(nodeCount);
+  int** adjacencyMatrix = getAdjacencyMatrix(*nodeCount);
 
   // Adds each edge to the Adjacency Matrix one by one
-  for (int edge = 0; edge < edgeCount; edge++) {
+  for (int edge = 0; edge < *edgeCount; edge++) {
     int node1, node2;
     fscanf(inputFile, "%d", &node1);
     fscanf(inputFile, "%d", &node2);
     // Check to make sure node number inputted is valid
-    if (node1 > nodeCount || node2 > nodeCount || node1 < 1 || node2 < 1) {
-      printf("Invalid value entered; node number must be between 1 and %d\n",
-             nodeCount);
-      for (int row = 0; row < nodeCount; row++) {
+    if (node1 > *nodeCount || node2 > *nodeCount || node1 < 1 || node2 < 1) {
+      printf(
+          "Invalid node value entered; node number must be between 1 and the "
+          "max number of nodes\n");
+      for (int row = 0; row < *nodeCount; row++) {
         free(adjacencyMatrix[row]);
       }
       free(adjacencyMatrix);
       fclose(inputFile);
-      return 1;
+      // return 1;
     }
     adjacencyMatrix[node1 - 1][node2 - 1] = 1;
     adjacencyMatrix[node2 - 1][node1 - 1] = 1;
   }
 
-  int* degreeSequence = getDegreeSequence(nodeCount, adjacencyMatrix);
-  for (int i = 0; i < nodeCount; i++) {
-    printf("%d ", degreeSequence[i]);
+  fclose(inputFile);
+  return adjacencyMatrix;
+}
+
+int main(int argc, char* argv[]) {
+  // Checks if input filename was given as commandline argument
+  if (argc < 3) {
+    printf("The input filenames must be given as an argument\n");
+    return 1;
   }
-  printf("\n");
+
+  FILE* inputFile1 = fopen(argv[1], "r");
+  FILE* inputFile2 = fopen(argv[2], "r");
+
+  // Checks if the files opened successfully
+  if (!inputFile1 || !inputFile2) {
+    printf(
+        "One of the files couldn't be opened, please check the file names\n");
+    return 1;
+  }
+
+  int nodeCount1, edgeCount1;
+  int nodeCount2, edgeCount2;
+
+  int** adjacencyMatrix1 =
+      readGraphFromFile(&nodeCount1, &edgeCount1, inputFile1);
+  int** adjacencyMatrix2 =
+      readGraphFromFile(&nodeCount2, &edgeCount2, inputFile2);
+
+  int* degreeSequence1 = getDegreeSequence(nodeCount1, adjacencyMatrix1);
+  int* degreeSequence2 = getDegreeSequence(nodeCount2, adjacencyMatrix2);
+
+  // for (int i = 0; i < nodeCount1; i++) {
+  //   printf("%d ", degreeSequence1[i]);
+  // }
+  // printf("\n");
+
+  // for (int i = 0; i < nodeCount2; i++) {
+  //   printf("%d ", degreeSequence2[i]);
+  // }
+  // printf("\n");
 
   // Frees the allocated memory
-  for (int row = 0; row < nodeCount; row++) {
-    free(adjacencyMatrix[row]);
+  for (int row = 0; row < nodeCount1; row++) {
+    free(adjacencyMatrix1[row]);
   }
-  free(adjacencyMatrix);
-  free(degreeSequence);
+  for (int row = 0; row < nodeCount2; row++) {
+    free(adjacencyMatrix2[row]);
+  }
 
-  fclose(inputFile);
+  free(adjacencyMatrix1);
+  free(degreeSequence1);
+  free(adjacencyMatrix2);
+  free(degreeSequence2);
 
   return 0;
 }
