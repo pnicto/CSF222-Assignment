@@ -83,6 +83,42 @@ int** readGraphFromFile(int* nodeCount, int* edgeCount, FILE* inputFile) {
   return adjacencyMatrix;
 }
 
+// Returns 1 if two graphs are isomorphic, 0 otherwise
+int graphsAreIsomorphic(int* startPtr, int* endPtr, int* nodeSequence,
+                        int** adjacencyMatrix1, int** adjacencyMatrix2,
+                        int nodeCount) {
+  // If at the end of the sequence, check for equality
+  if (startPtr == endPtr - 1) {
+    int equal = 1;
+    for (int i = 0; (i < nodeCount) && equal; i++) {
+      for (int j = 0; j < i; j++) {
+        if (adjacencyMatrix1[i][j] !=
+            adjacencyMatrix2[nodeSequence[i]][nodeSequence[j]]) {
+          equal = 0;
+        }
+      }
+    }
+    if (equal) {
+      return 1;
+    }
+    return 0;
+  }
+
+  // If not at sequence end yet, call self recursively for all permutations
+  for (int* i = startPtr; i != endPtr; i++) {
+    int temp = *startPtr;
+    *startPtr = *i;
+    *i = temp;
+    if (graphsAreIsomorphic(startPtr + 1, endPtr, nodeSequence,
+                            adjacencyMatrix1, adjacencyMatrix2, nodeCount)) {
+      return 1;
+    }
+    *i = *startPtr;
+    *startPtr = temp;
+  }
+  return 0;
+}
+
 int main(int argc, char* argv[]) {
   // Checks if input filename was given as commandline argument
   if (argc < 3) {
@@ -111,15 +147,34 @@ int main(int argc, char* argv[]) {
   int* degreeSequence1 = getDegreeSequence(nodeCount1, adjacencyMatrix1);
   int* degreeSequence2 = getDegreeSequence(nodeCount2, adjacencyMatrix2);
 
-  // for (int i = 0; i < nodeCount1; i++) {
-  //   printf("%d ", degreeSequence1[i]);
-  // }
-  // printf("\n");
+  int flag = 1;
+  for (int i = 0; (i < nodeCount1) && flag; i++) {
+    if (degreeSequence1[i] != degreeSequence2[i]) {
+      flag = 0;
+    }
+  }
 
-  // for (int i = 0; i < nodeCount2; i++) {
-  //   printf("%d ", degreeSequence2[i]);
-  // }
-  // printf("\n");
+  if ((nodeCount1 != nodeCount1) || (edgeCount1 != edgeCount2) || !flag) {
+    printf("Not Isomorphic, no bijection found.\n");
+  } else {
+    int* nodeSequence = (int*)malloc(nodeCount1 * sizeof(int));
+    for (int i = 0; i < nodeCount1; i++) {
+      nodeSequence[i] = i;
+    }
+
+    if (graphsAreIsomorphic(&nodeSequence[0], &nodeSequence[nodeCount1],
+                            nodeSequence, adjacencyMatrix1, adjacencyMatrix2,
+                            nodeCount1)) {
+      printf("Isomorphic.\n");
+      for (int i = 0; i < nodeCount1; i++) {
+        printf("%d %d\n", i + 1, nodeSequence[i] + 1);
+      }
+    } else {
+      printf("Not Isomorphic, no bijection found.\n");
+    }
+
+    free(nodeSequence);
+  }
 
   // Frees the allocated memory
   for (int row = 0; row < nodeCount1; row++) {
